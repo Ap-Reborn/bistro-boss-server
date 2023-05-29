@@ -26,12 +26,22 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+
     const menuCollection = client.db("bistrodb").collection("menu");
+    const riviewsCollection = client.db("bistrodb").collection("riviews");
+
     // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
     app.get('/menu', async (req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result);
     })
+    // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
+    app.get('/riviews', async (req, res) => {
+      const result = await riviewsCollection.find().toArray();
+      res.send(result);
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
