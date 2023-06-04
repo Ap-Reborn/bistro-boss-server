@@ -43,6 +43,18 @@ async function run() {
       res.send(result);
     })
 
+    // 77.5 start
+    // cart collection apis(find multifol document)
+    app.get('/carts',async(req,res)=>{
+      const email =req.query.email;
+      if(!email){
+        res.send([]);
+      }
+      const query = {email: email};
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
+    // 77.5 end
     // cart collection (insert a document)
     app.post('/carts',async(req,res)=>{
       const item = req.body;
