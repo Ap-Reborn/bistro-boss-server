@@ -30,6 +30,7 @@ async function run() {
 
     const menuCollection = client.db("bistrodb").collection("menu");
     const riviewsCollection = client.db("bistrodb").collection("riviews");
+    const cartCollection = client.db("bistrodb").collection("carts");
 
     // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
     app.get('/menu', async (req, res) => {
@@ -42,6 +43,13 @@ async function run() {
       res.send(result);
     })
 
+    // cart collection (insert a document)
+    app.post('/carts',async(req,res)=>{
+      const item = req.body;
+      console.log(item);
+      const result = await cartCollection.insertOne(item);
+      req.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -60,3 +68,22 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`bistro boss is sitting on port${port}`);
 })
+
+/*
+*-----------------------------------
+*       NAMING COVENTION
+*----------------------------------
+*user : userCollection
+*app.get('/users')
+*app.get('/users/:id')
+*app.post('/users')
+*app.patch('/users/:id')
+*app.put('/users/:id')
+*app.delete('/users/:id')
+*
+*
+*
+*
+*
+*
+*/
