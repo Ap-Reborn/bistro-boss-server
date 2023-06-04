@@ -48,7 +48,7 @@ async function run() {
       const item = req.body;
       console.log(item);
       const result = await cartCollection.insertOne(item);
-      req.send(result);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
