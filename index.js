@@ -56,6 +56,20 @@ app.get('/users',async(req,res)=>{
       res.send(result);
     })
 
+    // 78.5 start
+    app.get('/users/admin/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter ={_id: new ObjectId(id)};
+      const updateDoc={
+        $set:{
+          role:'admin'
+        },
+      };
+      const result = await usersCollection.updateOne(filter,updateDoc);
+      res.send(result);
+    })
+    // 78.5 end
+
     //menu releted apis
     // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
     app.get('/menu', async (req, res) => {
