@@ -29,14 +29,25 @@ async function run() {
 
 
     const menuCollection = client.db("bistrodb").collection("menu");
+    const usersCollection = client.db("bistrodb").collection("users");
     const riviewsCollection = client.db("bistrodb").collection("riviews");
     const cartCollection = client.db("bistrodb").collection("carts");
 
+
+    // users releted apis
+    app.post('/users',async(req,res)=>{
+      const user =req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
+
+    //menu releted apis
     // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
     app.get('/menu', async (req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result);
     })
+    // review releted apis
     // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
     app.get('/riviews', async (req, res) => {
       const result = await riviewsCollection.find().toArray();
