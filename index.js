@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
@@ -9,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ucorztq.mongodb.net/?retryWrites=true&w=majority`;
 // const uri = 'mongodb+srv://bossUser:JquZht5zI3KpPSQi@cluster0.ucorztq.mongodb.net/?retryWrites=true&w=majority';
 
@@ -33,39 +34,48 @@ async function run() {
     const riviewsCollection = client.db("bistrodb").collection("riviews");
     const cartCollection = client.db("bistrodb").collection("carts");
 
+    // 78.7 start
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '1h'
+      })
+      res.send({ token })
+    })
+    // 78.7 end
 
     // users releted apis
     // sob user ke dekar jonno 
     // 78.3 start
-app.get('/users',async(req,res)=>{
-  const result=await usersCollection.find().toArray();
-  res.send(result);
-})
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
     // 78.3 end
     // users releted apis
-    app.post('/users',async(req,res)=>{
-      const user =req.body;
+    app.post('/users', async (req, res) => {
+      const user = req.body;
       console.log(user);
-      const query = {email: user.email}
-      const existingUser=await usersCollection.findOne(query);
-     console.log('existing user',existingUser);
-      if(existingUser){
-        return res.send({message:'user already exists'})
+      const query = { email: user.email }
+      const existingUser = await usersCollection.findOne(query);
+      console.log('existing user', existingUser);
+      if (existingUser) {
+        return res.send({ message: 'user already exists' })
       }
       const result = await usersCollection.insertOne(user);
       res.send(result);
     })
 
     // 78.5 start
-    app.get('/users/admin/:id',async(req,res)=>{
+    app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
-      const filter ={_id: new ObjectId(id)};
-      const updateDoc={
-        $set:{
-          role:'admin'
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'admin'
         },
       };
-      const result = await usersCollection.updateOne(filter,updateDoc);
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
     // 78.5 end
@@ -85,18 +95,18 @@ app.get('/users',async(req,res)=>{
 
     // 77.5 start
     // cart collection apis(find multifol document)
-    app.get('/carts',async(req,res)=>{
-      const email =req.query.email;
-      if(!email){
+    app.get('/carts', async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
         res.send([]);
       }
-      const query = {email: email};
+      const query = { email: email };
       const result = await cartCollection.find(query).toArray();
       res.send(result);
     });
     // 77.5 end
     // cart collection (insert a document)
-    app.post('/carts',async(req,res)=>{
+    app.post('/carts', async (req, res) => {
       const item = req.body;
       console.log(item);
       const result = await cartCollection.insertOne(item);
@@ -104,9 +114,9 @@ app.get('/users',async(req,res)=>{
     })
     //77.8 start
     // delete
-    app.delete('/carts/:id',async(req,res)=>{
-      const id =req.params.id;
-      const query = {_id: new ObjectId(id)};
+    app.delete('/carts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     })
