@@ -60,16 +60,36 @@ async function run() {
     })
     // 78.7 end
 
-    // users releted apis
+    // 78.11 start
+
+    // wrning use verifyJWT using verifyAdmin
+    const verifyAdmin =async(req,res,next)=>{
+      const email =req.decoded.email;
+      const query ={email: email}
+      const user = await usersCollection.findOne(query);
+      if(user?.role !== 'admin'){
+        return res.status(403).send({error:true,message:'forbidden message'});
+
+      }
+      next();
+    }
+    /* 
+    *0.do not secure links to those who should not see the links
+    *1.use jwt: verifyjwt (user pase koma dia verifyjwt dilam)
+    *use verifyAdmin middleware 
+    */
+   // 78.11 end
+   
+   // users releted apis
     // sob user ke dekar jonno 
     // 78.3 start
-    app.get('/users', async (req, res) => {
+    app.get('/users',verifyJWT, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     })
     // 78.3 end
     // users releted apis
-    app.post('/users', async (req, res) => {
+    app.post('/users',verifyJWT,verifyAdmin, async (req, res) => {
       const user = req.body;
       console.log(user);
       const query = { email: user.email }
