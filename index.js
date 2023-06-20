@@ -124,6 +124,7 @@ async function run() {
     })
 
     // 79.6 start
+    // img upload to imgdb
     app.post('/menu', verifyJWT, verifyAdmin, async (req, res) => {
       const newItem = req.body;
       const result = await menuCollection.insertOne(newItem)
