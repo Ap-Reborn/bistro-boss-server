@@ -9,18 +9,18 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 // 78.8 start
-const verifyJWT =(req,rex,next) =>{
-  const authorization =req.headers.authorization;
-  if(!authorization){
-    return res.status(401).send({error: true, message: 'unauthorize access'});
+const verifyJWT = (req, rex, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'unauthorize access' });
   }
   // bearer token
   const token = authorization.split(' ')[1];
-  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
-    if(err){
-      return res.status(401).send({error: true, message: 'unauthorize access'})
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: true, message: 'unauthorize access' })
     }
-    req.decoded=decoded;
+    req.decoded = decoded;
     next();
   })
 }
@@ -63,12 +63,12 @@ async function run() {
     // 78.11 start
 
     // wrning use verifyJWT using verifyAdmin
-    const verifyAdmin =async(req,res,next)=>{
-      const email =req.decoded.email;
-      const query ={email: email}
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email }
       const user = await usersCollection.findOne(query);
-      if(user?.role !== 'admin'){
-        return res.status(403).send({error:true,message:'forbidden message'});
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: 'forbidden message' });
 
       }
       next();
@@ -78,18 +78,18 @@ async function run() {
     *1.use jwt: verifyjwt (user pase koma dia verifyjwt dilam)
     *use verifyAdmin middleware 
     */
-   // 78.11 end
-   
-   // users releted apis
+    // 78.11 end
+
+    // users releted apis
     // sob user ke dekar jonno 
     // 78.3 start
-    app.get('/users',verifyJWT, async (req, res) => {
+    app.get('/users', verifyJWT, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     })
     // 78.3 end
     // users releted apis
-    app.post('/users',verifyJWT,verifyAdmin, async (req, res) => {
+    app.post('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const user = req.body;
       console.log(user);
       const query = { email: user.email }
@@ -122,6 +122,14 @@ async function run() {
       const result = await menuCollection.find().toArray();
       res.send(result);
     })
+
+    // 79.6 start
+    app.post('/menu', verifyJWT, verifyAdmin, async (req, res) => {
+      const newItem = req.body;
+      const result = await menuCollection.insertOne(newItem)
+      res.send(result);
+    })
+    // 79.6 end
     // review releted apis
     // load menu data geting data from menu(menuCollection teke data pawar jonno get korteci)
     app.get('/riviews', async (req, res) => {
@@ -131,16 +139,16 @@ async function run() {
 
     // 77.5 start
     // cart collection apis(find multifol document)
-  //  78.8 esa carts, pase verifyJWT , add kora hoica
-    app.get('/carts',verifyJWT, async (req, res) => {
+    //  78.8 esa carts, pase verifyJWT , add kora hoica
+    app.get('/carts', verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
       }
       // 78.8(2) start
-      const decodedEmail =req.decoded.email;
-      if(email !== decodedEmail){
-        return res.status(403).send({error: true, message: 'probidden access'})
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ error: true, message: 'probidden access' })
       }
       // 78.8(2) end
       const query = { email: email };
