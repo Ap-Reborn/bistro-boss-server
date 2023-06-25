@@ -53,6 +53,7 @@ async function run() {
     const usersCollection = client.db("bistrodb").collection("users");
     const riviewsCollection = client.db("bistrodb").collection("riviews");
     const cartCollection = client.db("bistrodb").collection("carts");
+    const paymentCollection = client.db("bistrodb").collection("payments");
 
     // 78.7 start
     app.post('/jwt', (req, res) => {
@@ -179,6 +180,7 @@ async function run() {
     //77.8 end
 
     // 80.5 (2)
+    // 80.7 (1) verfiJwt dibo admin dibo na 
     // create payment intent
     app.post('/create-payment-intent', verifyJWT, async (req, res) => {
       const { price } = req.body;
@@ -194,6 +196,21 @@ async function run() {
       })
     })
     // 80.5 (2)
+
+
+    // 80.9(1)
+    // payment related api
+    app.post('/payments', verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const insertResult = await paymentCollection.insertOne(payment);
+      
+      const query = { _id: { $in: payment.cartItems.map(id => new ObjectId(id)) } }
+      const deleteResult = await cartCollection.deleteMany(query)
+      
+      res.send({ insertResult, deleteResult });
+    })
+    // 80.9(1)
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
