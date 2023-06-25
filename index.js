@@ -3,6 +3,10 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
+// 80.5 (1)
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
+// 80.5
+
 const port = process.env.PORT || 5000;
 
 //middleware
@@ -166,13 +170,30 @@ async function run() {
     })
     //77.8 start
     // delete
-    app.delete('/carts/:id', async (req, res) => {
+    app.delete('/carts/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     })
     //77.8 end
+
+    // 80.5 (2)
+    // create payment intent
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    })
+    // 80.5 (2)
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
